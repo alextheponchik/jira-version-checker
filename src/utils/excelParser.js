@@ -2,6 +2,16 @@ import * as XLSX from 'xlsx-js-style';
 
 const REQUIRED_COLS = ['key', 'fix version/s'];
 
+const SD_PREFIXES = ['HELP'];
+const JIRA_BASE_URL = 'https://jira.ors-aero.ru/browse/';
+const SD_BASE_URL   = 'https://support.ors-aero.ru/browse/';
+
+function fallbackUrl(key) {
+  const upper = key.toUpperCase();
+  const isSD = SD_PREFIXES.some((p) => upper.startsWith(p + '-'));
+  return (isSD ? SD_BASE_URL : JIRA_BASE_URL) + key;
+}
+
 // Extract key→url mapping from the raw HTML content of Jira-exported .xls files.
 // Jira exports HTML with anchors like: href="https://…/browse/SIG-123">SIG-123</a>
 function extractLinkMap(arrayBuffer) {
@@ -86,7 +96,7 @@ export function parseExcelFile(arrayBuffer) {
     const fixVersions = rowObj[fixVersionCol]?.trim() ?? '';
     const linkedIssues = linkedIssuesCol ? (rowObj[linkedIssuesCol]?.trim() ?? '') : '';
 
-    data.push({ key, fixVersions, linkedIssues, url: linkMap.get(key) || null });
+    data.push({ key, fixVersions, linkedIssues, url: linkMap.get(key) || fallbackUrl(key) });
   }
 
   return { data };
