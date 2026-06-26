@@ -267,6 +267,83 @@ td {
   text-decoration: underline;
 }
 
+/* ── Filterable column headers ── */
+.th-filterable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  white-space: nowrap;
+}
+
+.th-filterable:hover {
+  background: #e2e6f0;
+}
+
+.th-active {
+  background: #dbeafe !important;
+  color: #1d4ed8;
+}
+
+.th-label {
+  margin-right: 4px;
+}
+
+.th-arrow {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  min-width: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #333;
+  white-space: nowrap;
+}
+
+.filter-option:hover {
+  background: #f3f4f6;
+}
+
+.filter-option input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #3a86ff;
+}
+
+.filter-all {
+  font-weight: 600;
+}
+
+.filter-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 4px 0;
+}
+
+.filter-hint {
+  color: #888;
+  font-size: 0.82rem;
+}
+
 .type-cell {
   font-size: 0.82rem;
   color: #444;

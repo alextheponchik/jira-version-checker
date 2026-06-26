@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { parseExcelFile } from './utils/excelParser';
 import { processData } from './utils/dataProcessor';
 import { exportToExcel } from './utils/excelExporter';
@@ -43,6 +43,72 @@ function KeyLink({ keyText, url }) {
   }
   return <span>{keyText}</span>;
 }
+
+// ── Column filter ────────────────────────────────────────────────────────────
+
+function FilterHeader({ label, allValues, selected, onToggle, onSelectAll }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const isActive = selected !== null;
+  const allChecked = selected === null;
+
+  return (
+    <th ref={ref} className={`th-filterable${isActive ? ' th-active' : ''}`} onClick={() => setOpen((o) => !o)}>
+      <span className="th-label">{label}</span>
+      <span className="th-arrow">{isActive ? '▼' : '⌄'}</span>
+      {open && (
+        <div className="filter-dropdown" onClick={(e) => e.stopPropagation()}>
+          <label className="filter-option filter-all">
+            <input
+              type="checkbox"
+              checked={allChecked}
+              onChange={() => { onSelectAll(); setOpen(false); }}
+            />
+            <span>Все</span>
+          </label>
+          <div className="filter-divider" />
+          {allValues.map((v) => {
+            const checked = selected === null || selected.has(v);
+            return (
+              <label key={v} className="filter-option">
+                <input type="checkbox" checked={checked} onChange={() => onToggle(v)} />
+                <span>{v || '—'}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+    </th>
+  );
+}
+
+// selected: null = show all; Set<string> = show only these values
+function useColumnFilter(allValues) {
+  const [selected, setSelected] = useState(null);
+
+  const toggle = useCallback((value) => {
+    setSelected((prev) => {
+      const base = prev ?? new Set(allValues);
+      const next = new Set(base);
+      if (next.has(value)) next.delete(value); else next.add(value);
+      return next.size === allValues.length ? null : next;
+    });
+  }, [allValues]);
+
+  const selectAll = useCallback(() => setSelected(null), []);
+  const passes = useCallback((value) => selected === null || selected.has(value), [selected]);
+
+  return { selected, toggle, selectAll, passes };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function MatchTable({ matches }) {
   const [filter, setFilter] = useState('all');
@@ -114,16 +180,25 @@ function MatchTable({ matches }) {
 }
 
 function UnlinkedTable({ unlinked }) {
-  const jiraCount = unlinked.filter((u) => u.system === 'Jira').length;
-  const sdCount = unlinked.filter((u) => u.system === 'Service Desk').length;
+  const allTypes    = [...new Set(unlinked.map((u) => u.issueType || ''))].sort();
+  const allStatuses = [...new Set(unlinked.map((u) => u.status    || ''))].sort();
+
+  const typeFilter   = useColumnFilter(allTypes);
+  const statusFilter = useColumnFilter(allStatuses);
+
+  const filtered = unlinked.filter(
+    (u) => typeFilter.passes(u.issueType || '') && statusFilter.passes(u.status || ''),
+  );
+
+  const sdCount = unlinked.length;
 
   return (
     <section className="section">
       <div className="section-header">
         <h2>Задачи без межсистемных связей</h2>
         <div className="section-stats">
-          <Badge count={jiraCount} color="yellow" /> Jira&nbsp;&nbsp;
-          <Badge count={sdCount} color="yellow" /> Service Desk
+          <Badge count={filtered.length} color="yellow" />
+          {filtered.length !== sdCount && <span className="filter-hint"> из {sdCount}</span>}
         </div>
       </div>
       <div className="table-wrap">
@@ -132,17 +207,29 @@ function UnlinkedTable({ unlinked }) {
             <tr>
               <th>Ключ задачи</th>
               <th>Система</th>
-              <th>Тип</th>
-              <th>Статус</th>
+              <FilterHeader
+                label="Тип"
+                allValues={allTypes}
+                selected={typeFilter.selected}
+                onToggle={typeFilter.toggle}
+                onSelectAll={typeFilter.selectAll}
+              />
+              <FilterHeader
+                label="Статус"
+                allValues={allStatuses}
+                selected={statusFilter.selected}
+                onToggle={statusFilter.toggle}
+                onSelectAll={statusFilter.selectAll}
+              />
               <th>Fix Version/s</th>
               <th>Linked Issues</th>
             </tr>
           </thead>
           <tbody>
-            {unlinked.length === 0 && (
-              <tr><td colSpan={6} className="empty-row">Все задачи имеют межсистемные связи</td></tr>
+            {filtered.length === 0 && (
+              <tr><td colSpan={6} className="empty-row">Нет задач, соответствующих фильтрам</td></tr>
             )}
-            {unlinked.map((u, i) => (
+            {filtered.map((u, i) => (
               <tr key={i} className="row-yellow">
                 <td className="key-cell"><KeyLink keyText={u.key} url={u.url} /></td>
                 <td>{u.system}</td>
