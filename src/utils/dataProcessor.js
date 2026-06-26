@@ -127,20 +127,6 @@ export function processData(jiraRows, sdRows) {
   // Tasks without any cross-system link
   const unlinked = [];
 
-  for (const row of jiraRows) {
-    if (!pairedKeys.has(row.key)) {
-      unlinked.push({
-        key: row.key,
-        url: row.url || keyUrl(row.key),
-        system: 'Jira',
-        issueType: row.issueType || '',
-        status: row.status || '',
-        fixVersions: row.fixVersions,
-        linkedIssues: row.linkedIssues,
-      });
-    }
-  }
-
   for (const row of sdRows) {
     if (!pairedKeys.has(row.key)) {
       unlinked.push({
