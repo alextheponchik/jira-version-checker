@@ -120,7 +120,7 @@ function UnlinkedTable({ unlinked }) {
   return (
     <section className="section">
       <div className="section-header">
-        <h2>Задачи без межсистемных связей (не показаны тикеты в статусе New, Reopened, On Hold)</h2>
+        <h2>Задачи без межсистемных связей</h2>
         <div className="section-stats">
           <Badge count={jiraCount} color="yellow" /> Jira&nbsp;&nbsp;
           <Badge count={sdCount} color="yellow" /> Service Desk
