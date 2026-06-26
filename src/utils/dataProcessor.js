@@ -1,5 +1,5 @@
 const JIRA_PREFIXES = ['SIG', 'TTSH', 'TSH'];
-const SD_PREFIXES = ['HELP'];
+const SD_PREFIXES = ['HELP', 'S7'];
 
 const JIRA_BASE_URL = 'https://jira.ors-aero.ru/browse/';
 const SD_BASE_URL   = 'https://support.ors-aero.ru/browse/';
