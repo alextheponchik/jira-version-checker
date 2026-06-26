@@ -2,6 +2,21 @@ import * as XLSX from 'xlsx-js-style';
 
 const REQUIRED_COLS = ['key', 'fix version/s'];
 
+// Extract key→url mapping from the raw HTML content of Jira-exported .xls files.
+// Jira exports HTML with anchors like: href="https://…/browse/SIG-123">SIG-123</a>
+function extractLinkMap(arrayBuffer) {
+  const text = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(arrayBuffer));
+  const map = new Map();
+  // Matches: href="URL" ... >KEY</a>  where KEY looks like ALPHA-digits
+  const re = /href="([^"]+)"[^>]*>([A-Z][A-Z0-9]*-\d+)<\/a>/gi;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const [, url, key] = m;
+    if (!map.has(key)) map.set(key, url);
+  }
+  return map;
+}
+
 function normCol(name) {
   return name ? name.toString().trim().toLowerCase() : '';
 }
@@ -21,6 +36,7 @@ function findDataSheet(workbook) {
 }
 
 export function parseExcelFile(arrayBuffer) {
+  const linkMap = extractLinkMap(arrayBuffer);
   const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
 
   const sheetName = findDataSheet(workbook);
@@ -70,7 +86,7 @@ export function parseExcelFile(arrayBuffer) {
     const fixVersions = rowObj[fixVersionCol]?.trim() ?? '';
     const linkedIssues = linkedIssuesCol ? (rowObj[linkedIssuesCol]?.trim() ?? '') : '';
 
-    data.push({ key, fixVersions, linkedIssues });
+    data.push({ key, fixVersions, linkedIssues, url: linkMap.get(key) || null });
   }
 
   return { data };

@@ -37,12 +37,12 @@ export function processData(jiraRows, sdRows) {
   // Build lookup maps
   const jiraDataMap = new Map();
   for (const row of jiraRows) {
-    jiraDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues });
+    jiraDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues, url: row.url });
   }
 
   const helpDataMap = new Map();
   for (const row of sdRows) {
-    helpDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues });
+    helpDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues, url: row.url });
   }
 
   // Collect unique cross-system pairs as "jiraKey|||helpKey"
@@ -97,6 +97,8 @@ export function processData(jiraRows, sdRows) {
     matches.push({
       jiraKey,
       helpKey,
+      jiraUrl: jiraInfo?.url || null,
+      helpUrl: helpInfo?.url || null,
       jiraFixVersions: jiraInfo ? (jiraFVStr || '') : 'Нет данных',
       helpFixVersions: helpInfo ? (helpFVStr || '') : 'Нет данных',
       status: matched ? 'Совпадает' : 'Не совпадает',
@@ -117,6 +119,7 @@ export function processData(jiraRows, sdRows) {
     if (!pairedKeys.has(row.key)) {
       unlinked.push({
         key: row.key,
+        url: row.url || null,
         system: 'Jira',
         fixVersions: row.fixVersions,
         linkedIssues: row.linkedIssues,
@@ -128,6 +131,7 @@ export function processData(jiraRows, sdRows) {
     if (!pairedKeys.has(row.key)) {
       unlinked.push({
         key: row.key,
+        url: row.url || null,
         system: 'Service Desk',
         fixVersions: row.fixVersions,
         linkedIssues: row.linkedIssues,

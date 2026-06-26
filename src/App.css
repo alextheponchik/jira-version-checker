@@ -256,6 +256,17 @@ td {
   white-space: nowrap;
 }
 
+.key-link {
+  color: #1a56db;
+  text-decoration: none;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.key-link:hover {
+  text-decoration: underline;
+}
+
 .linked-cell {
   max-width: 260px;
   word-break: break-word;

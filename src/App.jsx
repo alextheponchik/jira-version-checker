@@ -33,6 +33,17 @@ function Badge({ count, color }) {
   return <span className={`badge badge-${color}`}>{count}</span>;
 }
 
+function KeyLink({ keyText, url }) {
+  if (url) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className="key-link">
+        {keyText}
+      </a>
+    );
+  }
+  return <span>{keyText}</span>;
+}
+
 function MatchTable({ matches }) {
   const [filter, setFilter] = useState('all');
 
@@ -76,8 +87,8 @@ function MatchTable({ matches }) {
             )}
             {filtered.map((m, i) => (
               <tr key={i} className={m.matched ? 'row-green' : 'row-red'}>
-                <td className="key-cell">{m.jiraKey}</td>
-                <td className="key-cell">{m.helpKey}</td>
+                <td className="key-cell"><KeyLink keyText={m.jiraKey} url={m.jiraUrl} /></td>
+                <td className="key-cell"><KeyLink keyText={m.helpKey} url={m.helpUrl} /></td>
                 <td>{m.jiraFixVersions || '—'}</td>
                 <td>{m.helpFixVersions || '—'}</td>
                 <td>
@@ -123,7 +134,7 @@ function UnlinkedTable({ unlinked }) {
             )}
             {unlinked.map((u, i) => (
               <tr key={i} className="row-yellow">
-                <td className="key-cell">{u.key}</td>
+                <td className="key-cell"><KeyLink keyText={u.key} url={u.url} /></td>
                 <td>{u.system}</td>
                 <td>{u.fixVersions || '—'}</td>
                 <td className="linked-cell">{u.linkedIssues || '—'}</td>
