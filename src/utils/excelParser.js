@@ -48,11 +48,16 @@ function parseHtmlContent(arrayBuffer) {
     const key    = (anchor?.textContent ?? keyCell.textContent).trim();
     if (!key) continue;
 
-    const url          = anchor?.href || fallbackUrl(key);
-    const fixVersions  = fvCell  ? normCsv(fvCell.textContent)  : '';
-    const linkedIssues = liCell  ? normCsv(liCell.textContent)  : '';
+    const typeCell  = row.querySelector('td.issuetype');
+    const statCell  = row.querySelector('td.status');
 
-    data.push({ key, url, fixVersions, linkedIssues });
+    const url          = anchor?.href || fallbackUrl(key);
+    const fixVersions  = fvCell    ? normCsv(fvCell.textContent)    : '';
+    const linkedIssues = liCell    ? normCsv(liCell.textContent)    : '';
+    const issueType    = typeCell  ? typeCell.textContent.trim()     : '';
+    const status       = statCell  ? statCell.textContent.trim()    : '';
+
+    data.push({ key, url, fixVersions, linkedIssues, issueType, status });
   }
 
   if (data.length === 0) {
@@ -120,9 +125,11 @@ function parseXlsContent(arrayBuffer) {
   const colMap = {};
   headers.forEach((h) => { const n = normCol(h); if (!colMap[n]) colMap[n] = h; });
 
-  const keyCol        = colMap['key'];
-  const fixVersionCol = colMap['fix version/s'];
+  const keyCol          = colMap['key'];
+  const fixVersionCol   = colMap['fix version/s'];
   const linkedIssuesCol = colMap['linked issues'] || null;
+  const issueTypeCol    = colMap['issue type']    || null;
+  const statusCol       = colMap['status']        || null;
 
   const data = [];
   for (let i = 1; i < rawRows.length; i++) {
@@ -135,8 +142,10 @@ function parseXlsContent(arrayBuffer) {
 
     const fixVersions  = rowObj[fixVersionCol]?.trim() ?? '';
     const linkedIssues = linkedIssuesCol ? (rowObj[linkedIssuesCol]?.trim() ?? '') : '';
+    const issueType    = issueTypeCol    ? (rowObj[issueTypeCol]?.trim()    ?? '') : '';
+    const status       = statusCol       ? (rowObj[statusCol]?.trim()       ?? '') : '';
 
-    data.push({ key, fixVersions, linkedIssues, url: linkMap.get(key) || fallbackUrl(key) });
+    data.push({ key, fixVersions, linkedIssues, issueType, status, url: linkMap.get(key) || fallbackUrl(key) });
   }
 
   return { data };

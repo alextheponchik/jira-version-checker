@@ -267,6 +267,18 @@ td {
   text-decoration: underline;
 }
 
+.type-cell {
+  font-size: 0.82rem;
+  color: #444;
+  white-space: nowrap;
+}
+
+.issue-status {
+  font-size: 0.8rem;
+  color: #333;
+  white-space: nowrap;
+}
+
 .linked-cell {
   max-width: 260px;
   word-break: break-word;

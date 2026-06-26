@@ -75,20 +75,28 @@ function MatchTable({ matches }) {
           <thead>
             <tr>
               <th>Задача Jira</th>
+              <th>Тип (Jira)</th>
+              <th>Статус (Jira)</th>
               <th>Задача Service Desk</th>
+              <th>Тип (SD)</th>
+              <th>Статус (SD)</th>
               <th>Fix Version/s (Jira)</th>
-              <th>Fix Version/s (Service Desk)</th>
-              <th>Статус</th>
+              <th>Fix Version/s (SD)</th>
+              <th>Совпадение</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={5} className="empty-row">Нет данных</td></tr>
+              <tr><td colSpan={9} className="empty-row">Нет данных</td></tr>
             )}
             {filtered.map((m, i) => (
               <tr key={i} className={m.matched ? 'row-green' : 'row-red'}>
                 <td className="key-cell"><KeyLink keyText={m.jiraKey} url={m.jiraUrl} /></td>
+                <td className="type-cell">{m.jiraIssueType || '—'}</td>
+                <td><span className="issue-status">{m.jiraStatus || '—'}</span></td>
                 <td className="key-cell"><KeyLink keyText={m.helpKey} url={m.helpUrl} /></td>
+                <td className="type-cell">{m.helpIssueType || '—'}</td>
+                <td><span className="issue-status">{m.helpStatus || '—'}</span></td>
                 <td>{m.jiraFixVersions || '—'}</td>
                 <td>{m.helpFixVersions || '—'}</td>
                 <td>
@@ -124,18 +132,22 @@ function UnlinkedTable({ unlinked }) {
             <tr>
               <th>Ключ задачи</th>
               <th>Система</th>
+              <th>Тип</th>
+              <th>Статус</th>
               <th>Fix Version/s</th>
               <th>Linked Issues</th>
             </tr>
           </thead>
           <tbody>
             {unlinked.length === 0 && (
-              <tr><td colSpan={4} className="empty-row">Все задачи имеют межсистемные связи</td></tr>
+              <tr><td colSpan={6} className="empty-row">Все задачи имеют межсистемные связи</td></tr>
             )}
             {unlinked.map((u, i) => (
               <tr key={i} className="row-yellow">
                 <td className="key-cell"><KeyLink keyText={u.key} url={u.url} /></td>
                 <td>{u.system}</td>
+                <td className="type-cell">{u.issueType || '—'}</td>
+                <td><span className="issue-status">{u.status || '—'}</span></td>
                 <td>{u.fixVersions || '—'}</td>
                 <td className="linked-cell">{u.linkedIssues || '—'}</td>
               </tr>

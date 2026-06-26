@@ -45,12 +45,12 @@ export function processData(jiraRows, sdRows) {
   // Build lookup maps
   const jiraDataMap = new Map();
   for (const row of jiraRows) {
-    jiraDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues, url: row.url });
+    jiraDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues, url: row.url, issueType: row.issueType, status: row.status });
   }
 
   const helpDataMap = new Map();
   for (const row of sdRows) {
-    helpDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues, url: row.url });
+    helpDataMap.set(row.key, { fixVersions: row.fixVersions, linkedIssues: row.linkedIssues, url: row.url, issueType: row.issueType, status: row.status });
   }
 
   // Collect unique cross-system pairs as "jiraKey|||helpKey"
@@ -105,8 +105,12 @@ export function processData(jiraRows, sdRows) {
     matches.push({
       jiraKey,
       helpKey,
-      jiraUrl: jiraInfo?.url || keyUrl(jiraKey),
-      helpUrl: helpInfo?.url || keyUrl(helpKey),
+      jiraUrl:        jiraInfo?.url       || keyUrl(jiraKey),
+      helpUrl:        helpInfo?.url       || keyUrl(helpKey),
+      jiraIssueType:  jiraInfo?.issueType || '',
+      jiraStatus:     jiraInfo?.status    || '',
+      helpIssueType:  helpInfo?.issueType || '',
+      helpStatus:     helpInfo?.status    || '',
       jiraFixVersions: jiraInfo ? (jiraFVStr || '') : 'Нет данных',
       helpFixVersions: helpInfo ? (helpFVStr || '') : 'Нет данных',
       status: matched ? 'Совпадает' : 'Не совпадает',
@@ -129,6 +133,8 @@ export function processData(jiraRows, sdRows) {
         key: row.key,
         url: row.url || keyUrl(row.key),
         system: 'Jira',
+        issueType: row.issueType || '',
+        status: row.status || '',
         fixVersions: row.fixVersions,
         linkedIssues: row.linkedIssues,
       });
@@ -141,6 +147,8 @@ export function processData(jiraRows, sdRows) {
         key: row.key,
         url: row.url || keyUrl(row.key),
         system: 'Service Desk',
+        issueType: row.issueType || '',
+        status: row.status || '',
         fixVersions: row.fixVersions,
         linkedIssues: row.linkedIssues,
       });
