@@ -195,7 +195,7 @@ function UnlinkedTable({ unlinked }) {
   return (
     <section className="section">
       <div className="section-header">
-        <h2>Задачи без межсистемных связей</h2>
+        <h2>Задачи SD без связи с производственной в Jira</h2>
         <div className="section-stats">
           <Badge count={filtered.length} color="yellow" />
           {filtered.length !== sdCount && <span className="filter-hint"> из {sdCount}</span>}
