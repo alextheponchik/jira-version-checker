@@ -127,8 +127,10 @@ export function processData(jiraRows, sdRows) {
   // Tasks without any cross-system link
   const unlinked = [];
 
+  const EXCLUDED_STATUSES = new Set(['new', 'reopened', 'on hold']);
+
   for (const row of sdRows) {
-    if (!pairedKeys.has(row.key)) {
+    if (!pairedKeys.has(row.key) && !EXCLUDED_STATUSES.has((row.status || '').toLowerCase())) {
       unlinked.push({
         key: row.key,
         url: row.url || keyUrl(row.key),
