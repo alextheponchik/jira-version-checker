@@ -19,7 +19,7 @@ function FileInput({ label, onChange, fileName, error }) {
       <label className="file-label">{label}</label>
       <input
         type="file"
-        accept=".xlsx,.xls"
+        accept=".xlsx,.xls,.html,.htm"
         onChange={(e) => onChange(e.target.files[0] || null)}
         className="file-input"
       />
