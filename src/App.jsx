@@ -111,29 +111,46 @@ function useColumnFilter(allValues) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MatchTable({ matches }) {
-  const [filter, setFilter] = useState('all');
+  const [matchFilter, setMatchFilter] = useState('all');
+
+  const allJiraTypes    = [...new Set(matches.map((m) => m.jiraIssueType || ''))].sort();
+  const allJiraStatuses = [...new Set(matches.map((m) => m.jiraStatus    || ''))].sort();
+  const allHelpTypes    = [...new Set(matches.map((m) => m.helpIssueType || ''))].sort();
+  const allHelpStatuses = [...new Set(matches.map((m) => m.helpStatus    || ''))].sort();
+
+  const jiraTypeFilter   = useColumnFilter(allJiraTypes);
+  const jiraStatusFilter = useColumnFilter(allJiraStatuses);
+  const helpTypeFilter   = useColumnFilter(allHelpTypes);
+  const helpStatusFilter = useColumnFilter(allHelpStatuses);
 
   const filtered = matches.filter((m) => {
-    if (filter === 'match') return m.matched;
-    if (filter === 'mismatch') return !m.matched;
+    if (matchFilter === 'match'    && !m.matched) return false;
+    if (matchFilter === 'mismatch' &&  m.matched) return false;
+    if (!jiraTypeFilter.passes(m.jiraIssueType || ''))   return false;
+    if (!jiraStatusFilter.passes(m.jiraStatus  || ''))   return false;
+    if (!helpTypeFilter.passes(m.helpIssueType || ''))   return false;
+    if (!helpStatusFilter.passes(m.helpStatus  || ''))   return false;
     return true;
   });
 
-  const matchCount = matches.filter((m) => m.matched).length;
+  const matchCount    = matches.filter((m) => m.matched).length;
   const mismatchCount = matches.filter((m) => !m.matched).length;
 
   return (
     <section className="section">
       <div className="section-header">
-        <h2>Сопоставления</h2>
+        <h2>Сравнение версий релиза в Jira и SD</h2>
         <div className="section-stats">
           <Badge count={matchCount} color="green" /> совпадают&nbsp;&nbsp;
           <Badge count={mismatchCount} color="red" /> не совпадают
+          {filtered.length !== matches.length && (
+            <span className="filter-hint">&nbsp;(показано {filtered.length} из {matches.length})</span>
+          )}
         </div>
         <div className="filter-buttons">
-          <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>Все</button>
-          <button className={filter === 'mismatch' ? 'active' : ''} onClick={() => setFilter('mismatch')}>Не совпадают</button>
-          <button className={filter === 'match' ? 'active' : ''} onClick={() => setFilter('match')}>Совпадают</button>
+          <button className={matchFilter === 'all'      ? 'active' : ''} onClick={() => setMatchFilter('all')}>Все</button>
+          <button className={matchFilter === 'mismatch' ? 'active' : ''} onClick={() => setMatchFilter('mismatch')}>Не совпадают</button>
+          <button className={matchFilter === 'match'    ? 'active' : ''} onClick={() => setMatchFilter('match')}>Совпадают</button>
         </div>
       </div>
       <div className="table-wrap">
@@ -141,14 +158,14 @@ function MatchTable({ matches }) {
           <thead>
             <tr>
               <th>Задача Jira</th>
-              <th>Тип (Jira)</th>
-              <th>Статус (Jira)</th>
+              <FilterHeader label="Тип (Jira)"    allValues={allJiraTypes}    selected={jiraTypeFilter.selected}   onToggle={jiraTypeFilter.toggle}   onSelectAll={jiraTypeFilter.selectAll} />
+              <FilterHeader label="Статус (Jira)" allValues={allJiraStatuses} selected={jiraStatusFilter.selected} onToggle={jiraStatusFilter.toggle} onSelectAll={jiraStatusFilter.selectAll} />
               <th>Задача Service Desk</th>
-              <th>Тип (SD)</th>
-              <th>Статус (SD)</th>
+              <FilterHeader label="Тип (SD)"      allValues={allHelpTypes}    selected={helpTypeFilter.selected}   onToggle={helpTypeFilter.toggle}   onSelectAll={helpTypeFilter.selectAll} />
+              <FilterHeader label="Статус (SD)"   allValues={allHelpStatuses} selected={helpStatusFilter.selected} onToggle={helpStatusFilter.toggle} onSelectAll={helpStatusFilter.selectAll} />
               <th>Fix Version/s (Jira)</th>
               <th>Fix Version/s (SD)</th>
-              <th>Совпадение</th>
+              <th>Релиз</th>
             </tr>
           </thead>
           <tbody>
