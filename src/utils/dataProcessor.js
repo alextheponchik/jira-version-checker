@@ -1,6 +1,14 @@
 const JIRA_PREFIXES = ['SIG', 'TTSH', 'TSH'];
 const SD_PREFIXES = ['HELP'];
 
+const JIRA_BASE_URL = 'https://jira.ors-aero.ru/browse/';
+const SD_BASE_URL   = 'https://support.ors-aero.ru/browse/';
+
+function keyUrl(key) {
+  const isSD = SD_PREFIXES.some((p) => key.toUpperCase().startsWith(p + '-'));
+  return (isSD ? SD_BASE_URL : JIRA_BASE_URL) + key;
+}
+
 export function isJiraKey(key) {
   if (!key) return false;
   const k = key.toString().toUpperCase();
@@ -97,8 +105,8 @@ export function processData(jiraRows, sdRows) {
     matches.push({
       jiraKey,
       helpKey,
-      jiraUrl: jiraInfo?.url || null,
-      helpUrl: helpInfo?.url || null,
+      jiraUrl: jiraInfo?.url || keyUrl(jiraKey),
+      helpUrl: helpInfo?.url || keyUrl(helpKey),
       jiraFixVersions: jiraInfo ? (jiraFVStr || '') : 'Нет данных',
       helpFixVersions: helpInfo ? (helpFVStr || '') : 'Нет данных',
       status: matched ? 'Совпадает' : 'Не совпадает',
@@ -119,7 +127,7 @@ export function processData(jiraRows, sdRows) {
     if (!pairedKeys.has(row.key)) {
       unlinked.push({
         key: row.key,
-        url: row.url || null,
+        url: row.url || keyUrl(row.key),
         system: 'Jira',
         fixVersions: row.fixVersions,
         linkedIssues: row.linkedIssues,
@@ -131,7 +139,7 @@ export function processData(jiraRows, sdRows) {
     if (!pairedKeys.has(row.key)) {
       unlinked.push({
         key: row.key,
-        url: row.url || null,
+        url: row.url || keyUrl(row.key),
         system: 'Service Desk',
         fixVersions: row.fixVersions,
         linkedIssues: row.linkedIssues,
